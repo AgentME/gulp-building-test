@@ -10,7 +10,7 @@ var concat = require('gulp-concat');
 var gulpif = require('gulp-if');
 var uglify = require('gulp-uglify');
 
-var shouldMinify = false;
+var shouldMinify = true;
 
 gulp.task('bad', function() {
   var destname = 'bad.js';
@@ -21,15 +21,13 @@ gulp.task('bad', function() {
   })
     .bundle()
     .pipe(source(destname))
-    .pipe(addsrc.prepend(['src/header.js']))
     .pipe(streamify(
       sourcemaps.init({loadMaps: true})
-        .pipe(concat(destname, {newLine: ';\n'}))
         .pipe(gulpif(shouldMinify, uglify({
-          compress: false,
+          compress: true,
           preserveComments: 'some'
         })))
-        .pipe(sourcemaps.write(null))
+        .pipe(sourcemaps.write('.'))
     ))
     .pipe(gulp.dest('out/'));
 });
@@ -43,17 +41,12 @@ gulp.task('good', function() {
   })
     .bundle()
     .pipe(source(destname))
-    .pipe(addsrc.prepend(['src/header.js']))
-    .pipe(streamify(
-      sourcemaps.init({loadMaps: true})
-        .pipe(concat(destname, {newLine: ';\n'}))
-      ))
+    .pipe(streamify(sourcemaps.init({loadMaps: true})))
     .pipe(streamify(
       gulpif(shouldMinify, uglify({
-        compress: false,
+        compress: true,
         preserveComments: 'some'
-      }))
-        .pipe(sourcemaps.write(null))
-    ))
+      }))))
+    .pipe(streamify(sourcemaps.write('.')))
     .pipe(gulp.dest('out/'));
 });
